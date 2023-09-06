@@ -17,8 +17,8 @@ class ArchiveExtractCallback(
 ) : IArchiveExtractCallback {
     private var uos: OutputStream? = null
     override fun getStream(index: Int, extractAskMode: ExtractAskMode): ISequentialOutStream {
-        val path = inArchive.getStringProperty(index, PropID.PATH)
-        val isDir = inArchive.getProperty(index, PropID.IS_FOLDER) as Boolean
+        val path     = inArchive.getStringProperty(index, PropID.PATH)
+        val isDir    = inArchive.getProperty(index, PropID.IS_FOLDER) as Boolean
         val destPath = File(destDir, path)
         Log.d("debug", "Index: $index")
         Log.d("debug", "Extract Ask Mode: $extractAskMode")
