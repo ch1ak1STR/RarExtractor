@@ -25,39 +25,42 @@ class RarExtractorActivity : Activity() {
         super.onCreate(savedInstanceState)
         SevenZip.initSevenZipFromPlatformJAR()
         val receivedIntent = intent
-        if (receivedIntent.action == Intent.ACTION_SEND) {
+        if (receivedIntent.action == Intent.ACTION_SEND_MULTIPLE) { // ACTION_SEND_MULTIPLEに変更
             val clipData = receivedIntent.clipData
             if (clipData != null) {
-                val uri = clipData.getItemAt(0).uri
-                if (uri != null) {
-                    val file = getFileFromUri(uri)
-                    if (file != null) { Log.d("debug", "Received file: ${file.absolutePath}") }
-                    if (file != null && file.exists() && file.name.endsWith(".rar")) {
-                        try {
-                            val destDir = getDestinationDirectory(file)
-                            val format = ArchiveFormat.RAR5
-                            Log.d("RarExtractorActivity", "Archive format: $format")
-                            val randomAccessFile = RandomAccessFile(file, "r")
-                            val inStream = RandomAccessFileInStream(randomAccessFile)
-                            val inArchive = SevenZip.openInArchive(null, inStream)
-                            val extractCallback = ArchiveExtractCallback(inArchive, destDir)
-                            inArchive.extract(null, false, extractCallback)
-                            inArchive.close()
-                            inStream.close()
-                            val extractedFilePath = File(destDir, file.nameWithoutExtension)
-                            Log.d("debug", "Extracted file path: ${extractedFilePath.absolutePath}")
-                            registerFileToMediaStore(extractedFilePath)
-                            Toast.makeText(this, "解凍に成功しました。$extractedFilePath", Toast.LENGTH_SHORT).show()
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            Log.d("debug", "Error")
-                            Toast.makeText(this, "解凍に失敗しました。", Toast.LENGTH_SHORT).show()
+                for (i in 0 until clipData.itemCount) { // すべてのアイテムを処理
+                    val uri = clipData.getItemAt(i).uri
+                    if (uri != null) {
+                        val file = getFileFromUri(uri)
+                        if (file != null && file.exists() && file.name.endsWith(".rar")) {
+                            // ファイルの解凍と処理を行うロジックをここに追加
+                            try {
+                                val destDir = getDestinationDirectory(file)
+                                val format = ArchiveFormat.RAR5
+                                Log.d("RarExtractorActivity", "Archive format: $format")
+                                val randomAccessFile = RandomAccessFile(file, "r")
+                                val inStream = RandomAccessFileInStream(randomAccessFile)
+                                val inArchive = SevenZip.openInArchive(null, inStream)
+                                val extractCallback = ArchiveExtractCallback(inArchive, destDir)
+                                inArchive.extract(null, false, extractCallback)
+                                inArchive.close()
+                                inStream.close()
+                                val extractedFilePath = File(destDir, file.nameWithoutExtension)
+                                Log.d("debug", "Extracted file path: ${extractedFilePath.absolutePath}")
+                                registerFileToMediaStore(extractedFilePath)
+                                Toast.makeText(this, "解凍に成功しました。$extractedFilePath", Toast.LENGTH_SHORT).show()
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                                Log.d("debug", "Error")
+                                Toast.makeText(this, "解凍に失敗しました。", Toast.LENGTH_SHORT).show()
+                            }
                         }
                     }
                 }
             }
         }
     }
+
 
     private fun getFileFromUri(uri: Uri): File? {
         val contentResolver = contentResolver
