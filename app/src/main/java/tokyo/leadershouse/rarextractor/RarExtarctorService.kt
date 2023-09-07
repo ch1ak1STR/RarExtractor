@@ -19,7 +19,6 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.RandomAccessFile
 class RarExtractorService : Service() {
-
     @RequiresApi(Build.VERSION_CODES.Q)
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == Intent.ACTION_SEND_MULTIPLE || intent?.action == Intent.ACTION_SEND) {
@@ -30,7 +29,6 @@ class RarExtractorService : Service() {
                     if (uri != null) {
                         val file = getFileFromUri(uri)
                         if (file != null && file.exists() && file.name.endsWith(".rar")) {
-                            // ファイルの解凍と処理を行うロジックをここに追加
                             try {
                                 val destDir = getDestinationDirectory(file)
                                 val format = ArchiveFormat.RAR5
@@ -47,9 +45,7 @@ class RarExtractorService : Service() {
                                     "debug",
                                     "Extracted file path: ${extractedFilePath.absolutePath}"
                                 )
-                                // これがopen failed: EACCES (Permission denied)
-                                // 要修正
-                                // registerFileToMediaStore(extractedFilePath)
+                                registerFileToMediaStore(extractedFilePath)
                                 Toast.makeText(
                                     this,
                                     "解凍に成功しました。$extractedFilePath",
@@ -65,7 +61,7 @@ class RarExtractorService : Service() {
                 }
             }
         }
-        stopSelf() // サービスを停止する
+        stopSelf()
         return START_NOT_STICKY
     }
 
@@ -82,7 +78,7 @@ class RarExtractorService : Service() {
                 if (displayNameIndex != -1) {
                     val displayName = it.getString(displayNameIndex)
                     val inputStream = contentResolver.openInputStream(uri)
-                    val outputFile = File(cacheDir, displayName) // キャッシュディレクトリに一時的に保存
+                    val outputFile = File(cacheDir, displayName)
                     val outputStream = FileOutputStream(outputFile)
                     inputStream?.use { input -> outputStream.use { output -> input.copyTo(output) } }
                     return outputFile
@@ -98,9 +94,9 @@ class RarExtractorService : Service() {
         val contentValues = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, file.name)
             put(MediaStore.MediaColumns.MIME_TYPE, "application/octet-stream")
-            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOCUMENTS)
         }
-        contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+        contentResolver.insert(MediaStore.Files.getContentUri("external"), contentValues)
     }
 
     private fun getDestinationDirectory(file: File): File {
