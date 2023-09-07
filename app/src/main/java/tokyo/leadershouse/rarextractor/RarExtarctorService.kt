@@ -47,7 +47,9 @@ class RarExtractorService : Service() {
                                     "debug",
                                     "Extracted file path: ${extractedFilePath.absolutePath}"
                                 )
-                                registerFileToMediaStore(extractedFilePath)
+                                // これがopen failed: EACCES (Permission denied)
+                                // 要修正
+                                // registerFileToMediaStore(extractedFilePath)
                                 Toast.makeText(
                                     this,
                                     "解凍に成功しました。$extractedFilePath",

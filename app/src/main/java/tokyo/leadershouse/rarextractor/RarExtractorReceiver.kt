@@ -7,7 +7,6 @@ import android.os.Bundle
 import androidx.annotation.RequiresApi
 
 class RarExtractorActivity : Activity() {
-
     @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
